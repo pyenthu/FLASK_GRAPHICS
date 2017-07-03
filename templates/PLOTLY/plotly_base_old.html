@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="/static/bower_components/threestrap/build/threestrap.js"></script>
+</head>
+
+<style type="text/css">
+    body {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    #leftpane {
+        resize: both;
+        position: absolute;
+        background-color: lightgoldenrodyellow;
+        top: 2%;
+        left: 1%;
+        height: 90%;
+        width: 49%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+
+    #midpane {
+        resize: both;
+        position: absolute;
+        background-color: lightsalmon;
+        top: 2%;
+        left: 50%;
+        height: 90%;
+        width: 10%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+
+    #rightpane {
+        resize: both;
+        position: absolute;
+        background-color: lightgreen;
+        top: 2%;
+        left: 60%;
+        height: 90%;
+        width: 40%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+</style>
+
+
+<body>
+<div id='midpane'>
+    <button id="load_button">LOAD PLOTLY</button>
+    <button id="load_ajax_button">LOAD AJAX PLOTLY</button>
+    <button id="update_button">AJAX LOAD</button>
+    <button id="ajax_update_button">AJAX UPDATE</button>
+</div>
+<div id='leftpane'>
+    <div>
+        {% for id in ids %}
+            <h3>{{ id }}</h3>
+            <div id="{{ id }}"></div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id='rightpane'>
+</div>
+
+
+<script type="text/javascript">
+    $("#load_button").on("click", function () {
+        load_plotly();
+    });
+    $("#update_button").on("click", function () {
+        redraw_plotly();
+    });
+    $("#load_ajax_button").on("click", function () {
+        load_ajax_plotly();
+    });
+</script>
+
+
+</body>
+
+
+<footer>
+    <script type="text/javascript">
+        function load_ajax_plotly() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    contentType: "application/json; charset=utf-8",
+                    url: "/plotly_ajax",
+                    success: function (data) {
+                        var parent_graph = $('#rightpane');
+                        pane_no = 'pane' + (parent_graph.children().length + 1);
+                        new_div = jQuery('<div/>', {id: pane_no});
+                        parent_graph.append(new_div);
+                        sDiv = '#' + pane_no;
+                        var plot_element = document.getElementById(pane_no);
+                        myData = JSON.parse(data);
+                        alert(JSON.stringify(myData[0]));
+                        Plotly.plot(pane_no, myData[0].data, myData[0].layout);
+                        //$(sDiv).html(data);
+                        parent_graph.show();
+                    }
+                });
+            }
+            catch (err) {
+                alert("ERROR ON AJAX LOAD PLOTLY" + err);
+            }
+        }
+        function load_plotly() {
+            var graphs = {{graphJSON | safe}};
+            var ids = {{ids | safe}};
+            for (var i in graphs) {
+                Plotly.plot(ids[i], // the ID of the div, created above
+                        graphs[i].data,
+                        graphs[i].layout || {});
+            }
+        }
+
+        function redraw_plotly() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    contentType: "application/json; charset=utf-8",
+                    url: "/get_new_data",
+                    success: function (data) {
+                        var graphs = {{graphJSON | safe}};
+                        var ids = {{ids | safe}};
+
+                        alert(data);
+
+                        myData = JSON.parse(data);
+                        graphs[0].data.x = [5, 4, 2, 1];
+                        graphs[0].data.y = [4, 20, 100, 10];
+
+                        for (var i in graphs) {
+                            alert("HELLO UPDATE");
+                            Plotly.plot(ids[i], // the ID of the div, created above
+                                    graphs[i].data,
+                                    graphs[i].layout || {});
+                        }
+                    }
+                });
+            }
+            catch (err) {
+                alert("ERROR ON AJAX THIS IS " + err);
+            }
+        }
+
+    </script>
+</footer>
+
+</html>

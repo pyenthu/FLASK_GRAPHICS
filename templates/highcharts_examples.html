@@ -1,0 +1,127 @@
+{% extends 'new_base.html' %}
+{% block custom_packages %}
+    <script type="text/javascript" src="/static/bower_components/jquery/dist/jquery.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+{% endblock %}
+
+{% block custom_layout %}
+
+    <style type="text/css">
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #leftpane {
+            resize: both;
+            position: absolute;
+            background-color: lightgoldenrodyellow;
+            top: 2%;
+            left: 1%;
+            height: 90%;
+            width: 14%;
+            border: 1px solid black;
+            margin: 0px auto;
+            overflow: auto;
+        }
+
+        #highpane {
+            resize: both;
+            position: absolute;
+            background-color: lightsalmon;
+            top: 2%;
+            left: 15%;
+            height: 90%;
+            width: 55%;
+            border: 1px solid black;
+            margin: 0px auto;
+            overflow: auto;
+        }
+
+        #midpane {
+            resize: both;
+            position: absolute;
+            background-color: lightskyblue;
+            top: 2%;
+            left: 70%;
+            height: 90%;
+            width: 10%;
+            border: 1px solid black;
+            margin: 0px auto;
+            overflow: auto;
+        }
+
+        #rightpane {
+            resize: both;
+            position: absolute;
+            background-color: lightgreen;
+            top: 2%;
+            left: 85%;
+            height: 90%;
+            width: 10%;
+            border: 1px solid black;
+            margin: 0px auto;
+            overflow: auto;
+        }
+    </style>
+
+{% endblock %}
+
+{% block body %}
+
+    <div id='leftpane'>
+    </div>
+
+    <div id='highpane'>
+    </div>
+
+    <div id='midpane'>
+        <button type="button" id="high_init">INITIALIZE GRAPH</button>
+        <button type="button" id="hicharts_update">UPDATE DATA</button>
+        <button type="button" id="plotly_build">PLOTLY</button>
+    </div>
+    <div id='rightpane'>
+    </div>
+    <script>
+
+        $('#hicharts_update').click(function () {
+            try {
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    contentType: "application/json; charset=utf-8",
+                    url: "/get_new_data",
+                    success: function (data) {
+                        alert (data);
+                        myData = JSON.parse(data);//[0, 200, 20];
+                        chart1.series[0].setData(myData , true);
+                    }
+                });
+            }
+            catch (err) {
+                alert("ERROR ON AJAX THIS IS " + err);
+            }
+        });
+    </script>
+    <script>
+        $('#high_init').click(function () {
+            alert("HELLO THIS IS AJAX HIGHCHARTS");
+            try {
+                chartOptions = {
+                    chart: {
+                        renderTo: 'highpane',
+                        type: 'area'
+                    },
+                    series: [{
+                        data: [1, 2, 3]
+                    }]
+                };
+                chart1 = new Highcharts.Chart(chartOptions);
+            }
+            catch (err) {
+                alert("ERROR ON AJAX THIS IS " + err);
+            }
+        });
+    </script>
+
+{% endblock %}

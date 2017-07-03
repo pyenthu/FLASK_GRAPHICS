@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- D3.js     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>-->
+    <script src="/static/bower_components/d3/d3.js"></script>
+
+    <!-- jQuery -->
+    <!-- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> -->
+
+    <script src="/static/bower_components/jquery/dist/jquery.js"></script>
+
+    <!-- Plotly.js -->
+    <!--<script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
+    <script src="/static/bower_components/plotlyjs/plotly.js"></script>
+
+</head>
+
+<style type="text/css">
+    body {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    #leftpane {
+        resize: both;
+        position: absolute;
+        background-color: lightgoldenrodyellow;
+        top: 2%;
+        left: 1%;
+        height: 90%;
+        width: 25%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+
+    #midpane {
+        resize: both;
+        position: absolute;
+        background-color: lightsalmon;
+        top: 2%;
+        left: 26%;
+        height: 90%;
+        width: 14%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+
+    #rightpane {
+        resize: both;
+        position: absolute;
+        background-color: lightgreen;
+        top: 2%;
+        left: 40%;
+        height: 90%;
+        width: 59%;
+        border: 1px solid black;
+        margin: 0px auto;
+        overflow: auto;
+    }
+</style>
+
+
+<body>
+<div id='midpane'>
+    <button id="load_ajax_button">LOAD AJAX PLOTLY</button>
+    <button id="ajax_update_button">AJAX UPDATE</button>
+    <div>
+        <h3> SEGMENT REAL PLOTLY AJAX AND UPDATES</h3>
+    </div>
+    <button id="ajax_load_div">AJAX DIV LOAD</button>
+    <button id="ajax_load_json">AJAX JSON LOAD</button>
+</div>
+<div id='leftpane'>
+</div>
+
+<div id='rightpane'>
+</div>
+
+
+<script type="text/javascript">
+    $("#load_ajax_button").on("click", function () {
+        load_ajax_plotly();
+    });
+    $("#ajax_update_button").on("click", function () {
+        redraw_plotly();
+    });
+    $("#ajax_load_div").on("click", function () {
+        load_plotly_div();
+    });
+    $("#ajax_load_json").on("click", function () {
+        load_plotly_json();
+    });
+
+</script>
+
+
+</body>
+
+
+<footer>
+    <script type="text/javascript">
+        function load_ajax_plotly() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    async: true,
+                    contentType: "application/json; charset=utf-8",
+                    url: "/plotly_ajax",
+                    success: function (data) {
+                        var parent_graph = $('#rightpane');
+                        myGraphs = JSON.parse(data);
+                        //alert(JSON.stringify(myData[0]));
+                        for (i in myGraphs) {
+                            pane_no = 'pane' + (parent_graph.children().length + 1);
+                            new_div = jQuery('<div/>', {id: pane_no});
+                            parent_graph.append(new_div);
+                            Plotly.plot(pane_no, myGraphs[i].data, myGraphs[i].layout);
+                        }
+                        parent_graph.show();
+                    }
+                });
+            }
+            catch (err) {
+                alert("ERROR ON AJAX LOAD PLOTLY" + err);
+            }
+        }
+        function redraw_plotly() {
+            $.ajax({
+                type: "POST",
+                async: true,
+                contentType: "application/json; charset=utf-8",
+                url: "/get_new_data",
+                success: function (data) {
+                    try {
+                        var parent_graph = $('#rightpane');
+                        myGraphs = JSON.parse(data);
+                        for (var i = 0; i < myGraphs.length; i++) {
+                            pane_counter = i + 1;
+                            pane_no = 'pane' + pane_counter;
+                            //alert(JSON.stringify(myGraphs[i].data));
+                            Plotly.newPlot(pane_no, myGraphs[i].data, myGraphs[i].layout);
+                        }
+                        parent_graph.show();
+                    }
+                    catch (err) {
+                        alert(err);
+                    }
+                }
+            });
+        }
+        function load_plotly_div() {
+            $.ajax({
+                type: "POST",
+                async: true,
+                contentType: "application/json; charset=utf-8",
+                url: "/go_plotly_div",
+                success: function (data) {
+                    try {
+                        var parent_graph = $('#rightpane');
+                        parent_graph.html(data);
+                        parent_graph.show();
+                    }
+                    catch (err) {
+                        alert(err);
+                    }
+                }
+            });
+        }
+
+        function load_plotly_json() {
+            $.ajax({
+                type: "POST",
+                async: true,
+                contentType: "application/json; charset=utf-8",
+                url: "/go_plotly_json",
+                success: function (data) {
+                    try {
+                        var parent_graph = $('#rightpane');
+                        myData = JSON.parse(data);
+                        alert (myData.data);
+                        Plotly.plot('rightpane', myData.data, myData.layout);
+                    }
+                    catch (err) {
+                        alert(err);
+                    }
+                }
+            });
+        }
+    </script>
+</footer>
+
+</html>
