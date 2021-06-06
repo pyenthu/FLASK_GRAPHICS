@@ -1,15 +1,7 @@
 name: newvision
-channels:
-  - dlr-sc
 dependencies:
-  - pythonocc-core==7.4.1
   - pip
   - pip:
     - flask==1.1.2
     - Shapely==1.7.1
     - xlrd==1.2.0
-    - matplotlib==3.3.3
-    - dataclasses_json==0.5.2
-    - svgwrite==1.4
-    - shortuuid==1.0.1
-    - pandas==1.1.5
