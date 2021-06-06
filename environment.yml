@@ -2,7 +2,7 @@ name: newvision
 channels:
   - dlr-sc
 dependencies:
-  - python=3.7
+  - python=3.8.5
   - pythonocc-core==7.4.1
   - pip
   - pip:
