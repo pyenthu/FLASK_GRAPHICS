@@ -1,7 +1,9 @@
 name: newvision
 dependencies:
   - pip
+  - python==3.7
   - pip:
     - flask==1.1.2
     - Shapely==1.7.1
     - xlrd==1.2.0
+    - newpy
